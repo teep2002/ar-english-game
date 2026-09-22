@@ -60,19 +60,24 @@
   #msg{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;text-align:center;
        font-size:29px;font-weight:800;text-shadow:0 3px 14px #000;pointer-events:none;width:80%;}
 
-  /* ---------- แผงหน้าจอ ---------- */
+  /* ---------- แผงหน้าจอ (จัดวางแบบด้านข้าง) ---------- */
   .panel{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
          padding:14px;background:linear-gradient(135deg,#4834d4,#2d1b69);overflow:auto;}
-  .card{background:#fff;color:#2d3436;border-radius:22px;padding:22px;max-width:540px;width:100%;
-        box-shadow:0 20px 50px rgba(0,0,0,.5);text-align:center;}
-  .banner-img{width:100%;border-radius:14px;margin-bottom:12px;box-shadow:0 4px 12px rgba(0,0,0,.15);object-fit:cover;}
-  .card h1{margin:0 0 4px;font-size:23px;color:#4834d4;}
-  .sub{color:#636e72;font-size:13px;margin:0 0 12px;line-height:1.5;}
+  
+  .start-container{display:flex;gap:20px;align-items:center;max-width:880px;width:100%;justify-content:center;}
+  
+  .teacher-side{flex:1;text-align:center;}
+  .teacher-side img{width:100%;max-width:360px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,0.4);border:3px solid rgba(255,255,255,0.2);}
+
+  .card{background:#fff;color:#2d3436;border-radius:22px;padding:22px;max-width:440px;width:100%;
+        box-shadow:0 20px 50px rgba(0,0,0,.5);text-align:left;flex:1;}
+  .card h1{margin:0 0 4px;font-size:22px;color:#4834d4;text-align:center;}
+  .sub{color:#636e72;font-size:13px;margin:0 0 12px;line-height:1.5;text-align:center;}
   .card input,.card select{width:100%;padding:11px;border:2px solid #dfe6e9;border-radius:12px;
-        font-size:15px;font-family:inherit;margin-bottom:9px;background:#fff;color:#2d3436;text-align:left;}
+        font-size:15px;font-family:inherit;margin-bottom:9px;background:#fff;color:#2d3436;}
   .card input:focus,.card select:focus{outline:none;border-color:#4834d4;}
   .howto{background:#fff9db;border-left:5px solid #fdcb6e;padding:9px 12px;border-radius:10px;
-         font-size:13px;line-height:1.6;margin-bottom:10px;text-align:left;}
+         font-size:13px;line-height:1.6;margin-bottom:10px;}
   .go{width:100%;padding:14px;border:none;border-radius:14px;font-size:16px;font-weight:800;
       font-family:inherit;color:#fff;background:#4834d4;cursor:pointer;margin-bottom:8px;}
   .go.alt{background:#00b894;} .go.ghost{background:#b2bec3;color:#2d3436;}
@@ -88,6 +93,12 @@
   .lb{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;}
   .lb th,.lb td{padding:6px 8px;border-bottom:1px solid #dfe6e9;text-align:left;}
   .lb th{background:#f1f2f6;}
+
+  /* มือถือจอเล็ก ปรับให้เรียงลงมาแทน */
+  @media(max-width:768px){
+    .start-container{flex-direction:column;}
+    .teacher-side img{max-width:280px;margin-bottom:10px;}
+  }
 
   /* ปุ่มเปิด/ปิดเสียงมุมจอ */
   #musicToggle{position:fixed;top:10px;right:10px;z-index:70;background:rgba(0,0,0,0.6);
@@ -126,38 +137,45 @@
 
 <div id="msg"></div>
 
-<!-- ============ หน้าเริ่ม ============ -->
+<!-- ============ หน้าเริ่ม (มีรูปคุณครูอยู่ด้านข้าง และจะหายไปเมื่อกดเริ่มเกม) ============ -->
 <div class="panel" id="pStart">
-  <div class="card">
-    <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80" alt="Banner" class="banner-img" id="bannerImg">
-    <h1>❄️ AR Sentence Scramble</h1>
-    <p class="sub">Bankokchang School • English Classroom (Kru Khanugnit)</p>
-
-    <input id="inName" placeholder="ชื่อ–นามสกุล" autocomplete="off">
-    <input id="inRoom" placeholder="ชั้น/ห้อง เช่น ม.1/3" autocomplete="off">
-    <select id="inCount">
-      <option value="5">เล่น 5 ข้อ (สั้น)</option>
-      <option value="10" selected>เล่น 10 ข้อ (แนะนำ)</option>
-      <option value="15">เล่นทั้งหมด 15 ข้อ</option>
-    </select>
-
-    <div class="howto">
-      <b>วิธีเล่นด้วยมือ 🖐️</b><br>
-      1. ยกมือให้กล้องเห็น → มีวงกลมตามปลายนิ้ว<br>
-      2. <b>จีบนิ้ว</b> (โป้ง+ชี้แตะกัน) ตรงคำ = หยิบ | **แบมือ** = วาง<br>
-      3. <b>จ่อนิ้วค้างที่ปุ่ม 1 วินาที</b> = กดปุ่ม
+  <div class="start-container">
+    <!-- ฝั่งรูปคุณครู -->
+    <div class="teacher-side">
+      <img src="teacher.jpg" alt="Kru Khanugnit" id="teacherImg" onerror="this.src='https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80'">
     </div>
 
-    <p id="camState">⏳ กำลังตรวจสอบระบบ…</p>
+    <!-- ฝั่งฟอร์มกรอกข้อมูล -->
+    <div class="card">
+      <h1>❄️ AR Sentence Scramble</h1>
+      <p class="sub">Bankokchang School • Kru Khanugnit</p>
 
-    <button class="go alt" id="btnAR" onclick="start('ar')">▶ เริ่มเล่นแบบ AR (ใช้มือ)</button>
-    <button class="go ghost" onclick="start('touch')">👆 เล่นแบบลากนิ้ว / เมาส์</button>
+      <input id="inName" placeholder="ชื่อ–นามสกุล" autocomplete="off">
+      <input id="inRoom" placeholder="ชั้น/ห้อง เช่น ม.1/3" autocomplete="off">
+      <select id="inCount">
+        <option value="5">เล่น 5 ข้อ (สั้น)</option>
+        <option value="10" selected>เล่น 10 ข้อ (แนะนำ)</option>
+        <option value="15">เล่นทั้งหมด 15 ข้อ</option>
+      </select>
+
+      <div class="howto">
+        <b>วิธีเล่นด้วยมือ 🖐️</b><br>
+        1. ยกมือให้กล้องเห็น → วงกลมตามปลายนิ้ว<br>
+        2. <b>จีบนิ้ว</b> (โป้ง+ชี้) หยิบคำ | <b>แบมือ</b> วาง<br>
+        3. <b>จ่อนิ้วค้างที่ปุ่ม 1 วินาที</b> = กดปุ่ม
+      </div>
+
+      <p id="camState">⏳ กำลังตรวจสอบระบบ…</p>
+
+      <button class="go alt" id="btnAR" onclick="start('ar')">▶ เริ่มเล่นแบบ AR (ใช้มือ)</button>
+      <button class="go ghost" onclick="start('touch')">👆 เล่นแบบลากนิ้ว / เมาส์</button>
+    </div>
   </div>
 </div>
 
 <!-- ============ หน้าสรุป ============ -->
 <div class="panel hide" id="pEnd">
-  <div class="card" style="text-align:center">
+  <div class="card" style="text-align:center; margin:auto;">
     <div id="rEmoji" style="font-size:52px">🎉</div>
     <h1 id="rTitle">เก่งมาก!</h1>
     <p class="sub" id="rSub"></p>
@@ -175,38 +193,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js"></script>
 <script>
-/* แทนที่แบนเนอร์ด้วยรูปภาพที่คุณส่งมาเมื่อโหลดหน้าเว็บ */
-window.addEventListener('DOMContentLoaded', function(){
-  var imgEl = document.getElementById('bannerImg');
-  // เนื่องจากรูปภาพจากแชทถูกอัปโหลดเป็นไฟล์ชั่วคราว ระบบได้แปลงลิงก์รูปภาพให้แสดงผลบนหน้าเว็บเรียบร้อยแล้ว
-  imgEl.src = 'data:image/jpeg;base64,...' || imgEl.src;
-});
-</script>
-<script>
-/* โค้ดส่วนภาพจริงแปลงเป็น Base64 ฝังในหน้าเว็บ */
-(function(){
-  var canvasTemp = document.createElement('canvas');
-  var img = new Image();
-  img.crossOrigin = "anonymous";
-  img.onload = function(){
-    canvasTemp.width = img.width; canvasTemp.height = img.height;
-    var ctx = canvasTemp.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-    try {
-      document.getElementById('bannerImg').src = canvasTemp.toDataURL('image/jpeg');
-    } catch(e){}
-  };
-  img.src = 'https://raw.githubusercontent.com/teep2002/ar-english-game/main/banner.jpg';
-})();
-</script>
-
-<script>
-/* 
-   คำแนะนำสำหรับคุณครู: 
-   เพื่อให้รูปภาพแสดงผลได้ชัวร์ 100% ให้นำรูปภาพโปสเตอร์ของคุณครูไปอัปโหลดใส่ไว้ใน GitHub (ตั้งชื่อไฟล์ว่า banner.jpg) 
-   หรือถ้าต้องการใช้โค้ดชุดนี้แบบสำเร็จรูป ระบบได้จัดเตรียมโครงสร้างรองรับรูปภาพเรียบร้อยแล้วครับ!
-*/
-
+/* ระบบหิมะตก */
 var snowCanvas = document.getElementById('snowCanvas'), sCtx = snowCanvas.getContext('2d');
 var flakes = [];
 function initSnow(){
@@ -239,10 +226,7 @@ function updateSnow(){
     var f = flakes[i];
     f.y += f.speed;
     f.x += Math.sin(f.y / 30) * 0.5;
-    if(f.y > snowCanvas.height){
-      f.y = -10;
-      f.x = Math.random() * snowCanvas.width;
-    }
+    if(f.y > snowCanvas.height){ f.y = -10; f.x = Math.random() * snowCanvas.width; }
   }
 }
 setInterval(drawSnow, 33);
@@ -397,7 +381,7 @@ function start(mode){
 
   var go=function(){
     SENT=shuffle(BANK_SENTENCES).slice(0,n);
-    $('pStart').classList.add('hide');
+    $('pStart').classList.add('hide'); // ซ่อนหน้าแรกและรูปคุณครูเมื่อเกมเริ่ม
     ['hud','answer','bank','tools'].forEach(function(i){$(i).classList.remove('hide');});
     if(MODE!=='ar') $('dim').style.background='linear-gradient(135deg,#2d1b69,#12122b)';
     t0=Date.now();
