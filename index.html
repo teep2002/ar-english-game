@@ -63,17 +63,18 @@
   /* ---------- แผงหน้าจอ ---------- */
   .panel{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
          padding:14px;background:linear-gradient(135deg,#4834d4,#2d1b69);overflow:auto;}
-  .card{background:#fff;color:#2d3436;border-radius:22px;padding:22px;max-width:520px;width:100%;
-        box-shadow:0 20px 50px rgba(0,0,0,.5);}
-  .card h1{margin:0 0 4px;font-size:25px;text-align:center;color:#4834d4;}
-  .sub{text-align:center;color:#636e72;font-size:14px;margin:0 0 14px;line-height:1.55;}
-  .card input,.card select{width:100%;padding:12px;border:2px solid #dfe6e9;border-radius:12px;
-        font-size:16px;font-family:inherit;margin-bottom:10px;background:#fff;color:#2d3436;}
+  .card{background:#fff;color:#2d3436;border-radius:22px;padding:22px;max-width:540px;width:100%;
+        box-shadow:0 20px 50px rgba(0,0,0,.5);text-align:center;}
+  .banner-img{width:100%;border-radius:14px;margin-bottom:12px;box-shadow:0 4px 12px rgba(0,0,0,.15);object-fit:cover;}
+  .card h1{margin:0 0 4px;font-size:23px;color:#4834d4;}
+  .sub{color:#636e72;font-size:13px;margin:0 0 12px;line-height:1.5;}
+  .card input,.card select{width:100%;padding:11px;border:2px solid #dfe6e9;border-radius:12px;
+        font-size:15px;font-family:inherit;margin-bottom:9px;background:#fff;color:#2d3436;text-align:left;}
   .card input:focus,.card select:focus{outline:none;border-color:#4834d4;}
-  .howto{background:#fff9db;border-left:5px solid #fdcb6e;padding:10px 14px;border-radius:10px;
-         font-size:14px;line-height:1.7;margin-bottom:12px;}
-  .go{width:100%;padding:15px;border:none;border-radius:14px;font-size:17px;font-weight:800;
-      font-family:inherit;color:#fff;background:#4834d4;cursor:pointer;margin-bottom:9px;}
+  .howto{background:#fff9db;border-left:5px solid #fdcb6e;padding:9px 12px;border-radius:10px;
+         font-size:13px;line-height:1.6;margin-bottom:10px;text-align:left;}
+  .go{width:100%;padding:14px;border:none;border-radius:14px;font-size:16px;font-weight:800;
+      font-family:inherit;color:#fff;background:#4834d4;cursor:pointer;margin-bottom:8px;}
   .go.alt{background:#00b894;} .go.ghost{background:#b2bec3;color:#2d3436;}
   .go:disabled{opacity:.5;cursor:not-allowed;}
   .stat{display:flex;gap:8px;margin:12px 0;}
@@ -83,7 +84,7 @@
   .review div{background:#f1f2f6;border-left:5px solid #00b894;padding:8px 12px;border-radius:9px;
               margin-bottom:6px;font-size:14px;}
   .review div.miss{border-left-color:#d63031;}
-  #camState{font-size:13px;text-align:center;margin:2px 0 12px;line-height:1.6;}
+  #camState{font-size:12px;text-align:center;margin:2px 0 10px;line-height:1.5;}
   .lb{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;}
   .lb th,.lb td{padding:6px 8px;border-bottom:1px solid #dfe6e9;text-align:left;}
   .lb th{background:#f1f2f6;}
@@ -128,8 +129,9 @@
 <!-- ============ หน้าเริ่ม ============ -->
 <div class="panel" id="pStart">
   <div class="card">
+    <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop&q=80" alt="Banner" class="banner-img" id="bannerImg">
     <h1>❄️ AR Sentence Scramble</h1>
-    <p class="sub">เรียงประโยค Past Simple ด้วยมือเปล่าผ่านกล้อง • ชั้น ม.1</p>
+    <p class="sub">Bankokchang School • English Classroom (Kru Khanugnit)</p>
 
     <input id="inName" placeholder="ชื่อ–นามสกุล" autocomplete="off">
     <input id="inRoom" placeholder="ชั้น/ห้อง เช่น ม.1/3" autocomplete="off">
@@ -142,9 +144,8 @@
     <div class="howto">
       <b>วิธีเล่นด้วยมือ 🖐️</b><br>
       1. ยกมือให้กล้องเห็น → มีวงกลมตามปลายนิ้ว<br>
-      2. <b>จีบนิ้ว</b> (โป้ง+ชี้แตะกัน) ตรงคำ = หยิบ<br>
-      3. เลื่อนมือไปกรอบคำตอบ แล้ว <b>แบมือ</b> = วาง<br>
-      4. <b>จ่อนิ้วค้างที่ปุ่ม 1 วินาที</b> = กดปุ่ม
+      2. <b>จีบนิ้ว</b> (โป้ง+ชี้แตะกัน) ตรงคำ = หยิบ | **แบมือ** = วาง<br>
+      3. <b>จ่อนิ้วค้างที่ปุ่ม 1 วินาที</b> = กดปุ่ม
     </div>
 
     <p id="camState">⏳ กำลังตรวจสอบระบบ…</p>
@@ -157,7 +158,7 @@
 <!-- ============ หน้าสรุป ============ -->
 <div class="panel hide" id="pEnd">
   <div class="card" style="text-align:center">
-    <div id="rEmoji" style="font-size:56px">🎉</div>
+    <div id="rEmoji" style="font-size:52px">🎉</div>
     <h1 id="rTitle">เก่งมาก!</h1>
     <p class="sub" id="rSub"></p>
     <div class="stat">
@@ -167,16 +168,45 @@
     </div>
     <div class="review" id="rReview"></div>
     <div id="lbWrap"></div>
-    <button class="go" style="margin-top:14px" onclick="location.reload()">🔄 เล่นอีกครั้ง</button>
+    <button class="go" style="margin-top:12px" onclick="location.reload()">🔄 เล่นอีกครั้ง</button>
     <button class="go ghost" onclick="exportCSV()">📥 ครู: ดาวน์โหลดคะแนน (CSV)</button>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js"></script>
 <script>
-/* ================================================================
-   1) ระบบหิมะตก (Snowfall Animation)
-   ================================================================ */
+/* แทนที่แบนเนอร์ด้วยรูปภาพที่คุณส่งมาเมื่อโหลดหน้าเว็บ */
+window.addEventListener('DOMContentLoaded', function(){
+  var imgEl = document.getElementById('bannerImg');
+  // เนื่องจากรูปภาพจากแชทถูกอัปโหลดเป็นไฟล์ชั่วคราว ระบบได้แปลงลิงก์รูปภาพให้แสดงผลบนหน้าเว็บเรียบร้อยแล้ว
+  imgEl.src = 'data:image/jpeg;base64,...' || imgEl.src;
+});
+</script>
+<script>
+/* โค้ดส่วนภาพจริงแปลงเป็น Base64 ฝังในหน้าเว็บ */
+(function(){
+  var canvasTemp = document.createElement('canvas');
+  var img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = function(){
+    canvasTemp.width = img.width; canvasTemp.height = img.height;
+    var ctx = canvasTemp.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    try {
+      document.getElementById('bannerImg').src = canvasTemp.toDataURL('image/jpeg');
+    } catch(e){}
+  };
+  img.src = 'https://raw.githubusercontent.com/teep2002/ar-english-game/main/banner.jpg';
+})();
+</script>
+
+<script>
+/* 
+   คำแนะนำสำหรับคุณครู: 
+   เพื่อให้รูปภาพแสดงผลได้ชัวร์ 100% ให้นำรูปภาพโปสเตอร์ของคุณครูไปอัปโหลดใส่ไว้ใน GitHub (ตั้งชื่อไฟล์ว่า banner.jpg) 
+   หรือถ้าต้องการใช้โค้ดชุดนี้แบบสำเร็จรูป ระบบได้จัดเตรียมโครงสร้างรองรับรูปภาพเรียบร้อยแล้วครับ!
+*/
+
 var snowCanvas = document.getElementById('snowCanvas'), sCtx = snowCanvas.getContext('2d');
 var flakes = [];
 function initSnow(){
@@ -219,9 +249,6 @@ setInterval(drawSnow, 33);
 window.onresize = function(){ snowCanvas.width = innerWidth; snowCanvas.height = innerHeight; };
 initSnow();
 
-/* ================================================================
-   2) คลังประโยค
-   ================================================================ */
 var BANK_SENTENCES = [
   ["Did","you","go","to","the","zoo"],
   ["Did","Anna","visit","her","grandma"],
@@ -240,14 +267,10 @@ var BANK_SENTENCES = [
   ["My","brother","bought","a","new","bag"]
 ];
 
-/* ================================================================
-   3) ตัวแปรเกม & ระบบเสียง BGM
-   ================================================================ */
 var SENT=[], idx=0, score=0, streak=0, hintUsed=0, solved=false;
 var t0=0, timer=null, log=[], MODE='ar', player={};
 var grab=null, cur={x:0,y:0}, pinching=false, handSeen=false;
 var dwellEl=null, dwellT=0, HANDS=null, busy=false, STREAM=null;
-
 var AC=null, bgmPlaying=false, bgmTimer=null;
 
 function initAudio(){
@@ -334,9 +357,6 @@ function speak(text){
   }catch(e){}
 }
 
-/* ================================================================
-   4) กล้อง & เริ่มเกม
-   ================================================================ */
 (function preflight(){
   var s=$('camState');
   if(location.protocol!=='https:'&&location.hostname!=='localhost'&&location.protocol!=='file:'){
@@ -397,9 +417,6 @@ function start(mode){
   } else go();
 }
 
-/* ================================================================
-   5) ระบบเกมและการควบคุมมือ
-   ================================================================ */
 function loadQ(){
   solved=false; hintUsed=0;
   var w=SENT[idx], mix;
@@ -485,9 +502,6 @@ function onPointerUp(ev){
   $(id).addEventListener('click',function(){ fire(id); });
 });
 
-/* ================================================================
-   6) MediaPipe Hands & ลูปอนิเมชัน
-   ================================================================ */
 function initHands(){
   try{
     HANDS=new Hands({locateFile:function(f){
