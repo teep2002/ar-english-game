@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>AR Sentence Scramble – Past Simple (ม.1)</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤚</text></svg>">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
+  html,body{margin:0;height:100%;overflow:hidden;background:#12122b;color:#fff;
+    font-family:'Sarabun','Segoe UI',Tahoma,sans-serif;}
+
+  #video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);background:#000;}
+  #dim{position:fixed;inset:0;background:rgba(10,10,35,.34);z-index:2;}
+  #fx{position:fixed;inset:0;z-index:5;pointer-events:none;}
+
+  /* ---------- HUD ---------- */
+  #hud{position:fixed;top:0;left:0;right:0;display:flex;gap:5px;padding:7px;z-index:10;}
+  .chip{flex:1;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border-radius:12px;
+        padding:5px 6px;text-align:center;font-weight:700;font-size:15px;}
+  .chip span{display:block;font-size:10px;opacity:.72;font-weight:400;}
+
+  /* ---------- โซนวางคำ ---------- */
+  .zone{position:fixed;left:2%;width:78%;z-index:6;display:flex;flex-wrap:wrap;gap:9px;
+        align-content:center;justify-content:center;padding:12px 10px;border-radius:18px;}
+  #answer{top:74px;min-height:112px;border:3px dashed rgba(255,255,255,.6);background:rgba(0,0,0,.34);}
+  #answer.ok{border-color:#00e676;background:rgba(0,230,118,.24);}
+  #answer.bad{border-color:#ff5252;background:rgba(255,82,82,.24);animation:shake .4s;}
+  @keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+  #bank{bottom:14px;min-height:112px;background:rgba(0,0,0,.28);border:3px solid rgba(255,255,255,.22);}
+  .zlabel{position:absolute;top:-11px;left:16px;font-size:12px;background:#4834d4;
+          padding:2px 10px;border-radius:99px;font-weight:700;}
+
+  /* ---------- การ์ดคำ ---------- */
+  .tile{background:linear-gradient(145deg,#6c5ce7,#a29bfe);color:#fff;border:none;border-radius:14px;
+        padding:13px 19px;font-size:22px;font-weight:700;font-family:inherit;cursor:grab;
+        box-shadow:0 5px 0 #3c2bb3,0 8px 18px rgba(0,0,0,.45);transition:transform .1s;}
+  #answer .tile{background:linear-gradient(145deg,#00b894,#55efc4);box-shadow:0 5px 0 #00795f,0 8px 18px rgba(0,0,0,.45);}
+  .tile.hinted{background:linear-gradient(145deg,#fdcb6e,#ffeaa7)!important;color:#5d3a00;
+               box-shadow:0 5px 0 #c98f16!important;cursor:not-allowed;}
+  .tile.hot{transform:scale(1.13);outline:4px solid #ffeaa7;}
+  .tile.flying{position:fixed!important;z-index:40;pointer-events:none;margin:0;
+               transform:scale(1.18) rotate(-3deg);box-shadow:0 16px 36px rgba(0,0,0,.6);}
+
+  /* ---------- ปุ่มขวา ---------- */
+  #tools{position:fixed;right:7px;top:50%;transform:translateY(-50%);z-index:12;
+         display:flex;flex-direction:column;gap:9px;width:17%;min-width:90px;}
+  .hotbtn{position:relative;overflow:hidden;border:none;border-radius:16px;padding:13px 4px;
+          font-family:inherit;font-size:14px;font-weight:700;color:#fff;cursor:pointer;
+          box-shadow:0 6px 16px rgba(0,0,0,.45);}
+  .hotbtn b{position:relative;z-index:2;}
+  .hotbtn i{position:absolute;inset:0 auto 0 0;width:0;background:rgba(255,255,255,.45);z-index:1;}
+  .b-check{background:#00b894;} .b-hint{background:#fdcb6e;color:#5d3a00;}
+  .b-clear{background:#636e72;} .b-next{background:#0984e3;} .b-say{background:#e17055;}
+  .hide{display:none!important;}
+
+  #msg{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;text-align:center;
+       font-size:29px;font-weight:800;text-shadow:0 3px 14px #000;pointer-events:none;width:80%;}
+
+  /* ---------- แผงหน้าจอ ---------- */
+  .panel{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+         padding:14px;background:linear-gradient(135deg,#4834d4,#2d1b69);overflow:auto;}
+  .card{background:#fff;color:#2d3436;border-radius:22px;padding:22px;max-width:520px;width:100%;
+        box-shadow:0 20px 50px rgba(0,0,0,.5);}
+  .card h1{margin:0 0 4px;font-size:25px;text-align:center;color:#4834d4;}
+  .sub{text-align:center;color:#636e72;font-size:14px;margin:0 0 14px;line-height:1.55;}
+  .card input,.card select{width:100%;padding:12px;border:2px solid #dfe6e9;border-radius:12px;
+        font-size:16px;font-family:inherit;margin-bottom:10px;background:#fff;color:#2d3436;}
+  .card input:focus,.card select:focus{outline:none;border-color:#4834d4;}
+  .howto{background:#fff9db;border-left:5px solid #fdcb6e;padding:10px 14px;border-radius:10px;
+         font-size:14px;line-height:1.7;margin-bottom:12px;}
+  .go{width:100%;padding:15px;border:none;border-radius:14px;font-size:17px;font-weight:800;
+      font-family:inherit;color:#fff;background:#4834d4;cursor:pointer;margin-bottom:9px;}
+  .go.alt{background:#00b894;} .go.ghost{background:#b2bec3;color:#2d3436;}
+  .go:disabled{opacity:.5;cursor:not-allowed;}
+  .stat{display:flex;gap:8px;margin:12px 0;}
+  .stat div{flex:1;background:#f1f2f6;border-radius:12px;padding:8px;text-align:center;font-weight:800;}
+  .stat span{display:block;font-size:11px;color:#636e72;font-weight:400;}
+  .review{text-align:left;max-height:210px;overflow:auto;margin-top:10px;}
+  .review div{background:#f1f2f6;border-left:5px solid #00b894;padding:8px 12px;border-radius:9px;
+              margin-bottom:6px;font-size:14px;}
+  .review div.miss{border-left-color:#d63031;}
+  #camState{font-size:13px;text-align:center;margin:2px 0 12px;line-height:1.6;}
+  .lb{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;}
+  .lb th,.lb td{padding:6px 8px;border-bottom:1px solid #dfe6e9;text-align:left;}
+  .lb th{background:#f1f2f6;}
+</style>
+</head>
+<body>
+
+<video id="video" playsinline muted autoplay></video>
+<div id="dim"></div>
+<canvas id="fx"></canvas>
+
+<!-- ============ HUD ============ -->
+<div id="hud" class="hide">
+  <div class="chip"><span>ข้อ</span><b id="hQ">1/10</b></div>
+  <div class="chip"><span>คะแนน</span><b id="hScore">0</b></div>
+  <div class="chip"><span>ต่อเนื่อง</span><b id="hStreak">0🔥</b></div>
+  <div class="chip"><span>เวลา</span><b id="hTime">0:00</b></div>
+  <div class="chip"><span>มือ</span><b id="hHand">—</b></div>
+</div>
+
+<div class="zone hide" id="answer"><div class="zlabel">✅ วางประโยคที่นี่</div></div>
+<div class="zone hide" id="bank"><div class="zlabel">🧩 คลังคำ</div></div>
+
+<div id="tools" class="hide">
+  <button class="hotbtn b-check" id="btnCheck"><i></i><b>✓ ตรวจ</b></button>
+  <button class="hotbtn b-hint"  id="btnHint"><i></i><b>💡 ใบ้</b></button>
+  <button class="hotbtn b-clear" id="btnClear"><i></i><b>↺ ล้าง</b></button>
+  <button class="hotbtn b-say"   id="btnSay"><i></i><b>🔊 ฟัง</b></button>
+  <button class="hotbtn b-next hide" id="btnNext"><i></i><b>→ ต่อไป</b></button>
+</div>
+
+<div id="msg"></div>
+
+<!-- ============ หน้าเริ่ม ============ -->
+<div class="panel" id="pStart">
+  <div class="card">
+    <h1>🤚 AR Sentence Scramble</h1>
+    <p class="sub">เรียงประโยค Past Simple ด้วยมือเปล่าผ่านกล้อง • ชั้น ม.1</p>
+
+    <input id="inName" placeholder="ชื่อ–นามสกุล" autocomplete="off">
+    <input id="inRoom" placeholder="ชั้น/ห้อง เช่น ม.1/3" autocomplete="off">
+    <select id="inCount">
+      <option value="5">เล่น 5 ข้อ (สั้น)</option>
+      <option value="10" selected>เล่น 10 ข้อ (แนะนำ)</option>
+      <option value="15">เล่นทั้งหมด 15 ข้อ</option>
+    </select>
+
+    <div class="howto">
+      <b>วิธีเล่นด้วยมือ 🖐️</b><br>
+      1. ยกมือให้กล้องเห็น → มีวงกลมตามปลายนิ้ว<br>
+      2. <b>จีบนิ้ว</b> (โป้ง+ชี้แตะกัน) ตรงคำ = หยิบ<br>
+      3. เลื่อนมือไปกรอบคำตอบ แล้ว <b>แบมือ</b> = วาง<br>
+      4. <b>จ่อนิ้วค้างที่ปุ่ม 1 วินาที</b> = กดปุ่ม
+    </div>
+
+    <p id="camState">⏳ กำลังตรวจสอบระบบ…</p>
+
+    <button class="go alt" id="btnAR" onclick="start('ar')">▶ เริ่มเล่นแบบ AR (ใช้มือ)</button>
+    <button class="go ghost" onclick="start('touch')">👆 เล่นแบบลากนิ้ว / เมาส์</button>
+  </div>
+</div>
+
+<!-- ============ หน้าสรุป ============ -->
+<div class="panel hide" id="pEnd">
+  <div class="card" style="text-align:center">
+    <div id="rEmoji" style="font-size:56px">🎉</div>
+    <h1 id="rTitle">เก่งมาก!</h1>
+    <p class="sub" id="rSub"></p>
+    <div class="stat">
+      <div><span>คะแนน</span><b id="rScore">0</b></div>
+      <div><span>ตอบถูก</span><b id="rCorrect">0</b></div>
+      <div><span>เวลา</span><b id="rTime">0:00</b></div>
+    </div>
+    <div class="review" id="rReview"></div>
+    <div id="lbWrap"></div>
+    <button class="go" style="margin-top:14px" onclick="location.reload()">🔄 เล่นอีกครั้ง</button>
+    <button class="go ghost" onclick="exportCSV()">📥 ครู: ดาวน์โหลดคะแนน (CSV)</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js"></script>
+<script>
+/* ================================================================
+   1) คลังประโยค — ครูแก้ไข/เพิ่มได้ที่นี่ที่เดียว
+   ================================================================ */
+var BANK_SENTENCES = [
+  ["Did","you","go","to","the","zoo"],
+  ["Did","Anna","visit","her","grandma"],
+  ["Where","did","you","go","last","Sunday"],
+  ["Lucy","didn't","watch","TV","last","night"],
+  ["The","children","weren't","at","school"],
+  ["I","didn't","see","Ben","at","the","park"],
+  ["I","was","at","home","yesterday"],
+  ["We","played","football","after","school"],
+  ["My","parents","were","very","busy","last","Monday"],
+  ["Sam","visited","his","grandma","last","weekend"],
+  ["Dad","cooked","dinner","yesterday","evening"],
+  ["The","dog","slept","under","the","table"],
+  ["Sam","ate","an","apple","after","lunch"],
+  ["They","were","tired","after","the","game"],
+  ["My","brother","bought","a","new","bag"]
+];
+
+/* ================================================================
+   2) ตัวแปรเกม
+   ================================================================ */
+var SENT=[], idx=0, score=0, streak=0, hintUsed=0, solved=false;
+var t0=0, timer=null, log=[], MODE='ar', player={};
+var grab=null, cur={x:0,y:0}, pinching=false, handSeen=false;
+var dwellEl=null, dwellT=0, HANDS=null, busy=false, STREAM=null;
+
+function $(id){return document.getElementById(id);}
+var V=$('video'), FX=$('fx'), CTX=FX.getContext('2d');
+cur.x=innerWidth/2; cur.y=innerHeight/2;
+
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=~~(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function mmss(s){return ~~(s/60)+':'+('0'+(s%60)).slice(-2);}
+function punct(w){return ['did','where','what','when','who','how','why'].indexOf(w[0].toLowerCase())>-1?'?':'.';}
+function full(w){return w.join(' ')+punct(w);}
+
+/* ================================================================
+   3) เสียง
+   ================================================================ */
+var AC=null;
+function beep(fs,d){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+ fs.forEach(function(f,i){var o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=f;
+ o.connect(g);g.connect(AC.destination);var s=AC.currentTime+i*d;g.gain.setValueAtTime(.16,s);
+ g.gain.exponentialRampToValueAtTime(.001,s+d);o.start(s);o.stop(s+d);});}catch(e){}}
+var sPick=function(){beep([700],.05);}, sDrop=function(){beep([430],.07);};
+var sGood=function(){beep([523,659,784,1047],.12);}, sBad=function(){beep([200,150],.16);};
+
+function speak(text){
+  try{
+    if(!window.speechSynthesis)return;
+    speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(text);
+    u.lang='en-US'; u.rate=.85;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ================================================================
+   4) กล้อง
+   ================================================================ */
+(function preflight(){
+  var s=$('camState');
+  if(location.protocol!=='https:'&&location.hostname!=='localhost'&&location.protocol!=='file:'){
+    s.style.color='#d63031'; s.innerHTML='⚠️ ต้องเปิดผ่าน <b>https://</b> กล้องจึงจะทำงาน';
+    $('btnAR').disabled=true; return;
+  }
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    s.style.color='#d63031'; s.innerHTML='⚠️ เบราว์เซอร์นี้ไม่รองรับกล้อง — ใช้ Chrome (Android/PC) หรือ Safari (iPhone)';
+    $('btnAR').disabled=true; return;
+  }
+  s.style.color='#00b894'; s.innerHTML='✅ ระบบพร้อม — กดเริ่มแล้วเลือก <b>"อนุญาต"</b> ให้ใช้กล้อง';
+})();
+
+function camFail(t){ var s=$('camState'); s.style.color='#d63031'; s.innerHTML='❌ '+t; }
+
+function openCamera(){
+  return new Promise(function(res){
+    navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false
+    }).then(function(st){
+      STREAM=st; V.srcObject=st;
+      V.onloadedmetadata=function(){ V.play(); };
+      res(true);
+    }).catch(function(e){
+      var m={
+        NotAllowedError:'คุณกด "บล็อก" ไว้ → กดไอคอน 🔒 หรือ 📷 ที่แถบ URL แล้วเลือก Allow จากนั้นรีเฟรชหน้า',
+        NotFoundError:'ไม่พบกล้องบนเครื่องนี้',
+        NotReadableError:'กล้องถูกโปรแกรมอื่นใช้อยู่ (Zoom / Meet / Teams) ให้ปิดก่อน',
+        OverconstrainedError:'กล้องไม่รองรับความละเอียดที่ขอ',
+        SecurityError:'ถูกนโยบายความปลอดภัยบล็อก'
+      };
+      camFail((m[e.name]||e.message)+'  ['+e.name+']');
+      res(false);
+    });
+  });
+}
+
+/* ================================================================
+   5) เริ่มเกม
+   ================================================================ */
+function start(mode){
+  MODE=mode;
+  player.name=$('inName').value.trim()||'ไม่ระบุชื่อ';
+  player.room=$('inRoom').value.trim()||'-';
+  var n=parseInt($('inCount').value,10);
+
+  var go=function(){
+    SENT=shuffle(BANK_SENTENCES).slice(0,n);
+    $('pStart').classList.add('hide');
+    ['hud','answer','bank','tools'].forEach(function(i){$(i).classList.remove('hide');});
+    if(MODE!=='ar') $('dim').style.background='linear-gradient(135deg,#2d1b69,#12122b)';
+    t0=Date.now();
+    timer=setInterval(function(){ $('hTime').textContent=mmss(~~((Date.now()-t0)/1000)); },500);
+    loadQ(); loop();
+  };
+
+  if(mode==='ar'){
+    $('camState').style.color='#0984e3';
+    $('camState').textContent='⏳ กำลังเปิดกล้อง… กด "อนุญาต" ด้วยนะ';
+    openCamera().then(function(ok){
+      if(!ok)return;
+      $('camState').style.color='#00b894';
+      $('camState').textContent='✅ กล้องพร้อม กำลังโหลดโมเดลมือ…';
+      initHands(); go();
+    });
+  } else go();
+}
+
+/* ================================================================
+   6) โหลดข้อ / สร้างการ์ดคำ
+   ================================================================ */
+function loadQ(){
+  solved=false; hintUsed=0;
+  var w=SENT[idx], mix;
+  do{ mix=shuffle(w); }while(mix.join(' ')===w.join(' ')&&w.length>2);
+
+  clearZone('answer'); clearZone('bank');
+  mix.forEach(function(word){ $('bank').appendChild(makeTile(word)); });
+
+  $('hQ').textContent=(idx+1)+'/'+SENT.length;
+  $('answer').className='zone';
+  $('btnNext').classList.add('hide');
+  $('btnCheck').classList.remove('hide');
+  toast('','',0);
+}
+function clearZone(id){
+  [].slice.call($(id).querySelectorAll('.tile')).forEach(function(t){t.remove();});
+}
+function makeTile(word,hint){
+  var b=document.createElement('button');
+  b.className='tile'+(hint?' hinted':''); b.textContent=word; b.type='button';
+  if(!hint) b.addEventListener('pointerdown',onPointerDown);
+  return b;
+}
+function tilesIn(id){ return [].slice.call($(id).querySelectorAll('.tile')); }
+
+/* ================================================================
+   7) หยิบ – ลาก – วาง
+   ================================================================ */
+function pickUp(el,x,y){
+  if(solved||grab||!el||el.classList.contains('hinted'))return;
+  var r=el.getBoundingClientRect();
+  grab={el:el,dx:x-r.left,dy:y-r.top,w:r.width,h:r.height};
+  el.style.width=r.width+'px'; el.style.height=r.height+'px';
+  el.classList.add('flying'); document.body.appendChild(el);
+  moveGrab(x,y); sPick();
+}
+function moveGrab(x,y){
+  if(!grab)return;
+  grab.el.style.left=(x-grab.dx)+'px';
+  grab.el.style.top =(y-grab.dy)+'px';
+}
+function release(x,y){
+  if(!grab)return;
+  var el=grab.el;
+  el.classList.remove('flying');
+  el.style.left=el.style.top=el.style.width=el.style.height='';
+  var ar=$('answer').getBoundingClientRect();
+  var zone=(y<ar.bottom+60)?$('answer'):$('bank');
+  var sibs=[].slice.call(zone.querySelectorAll('.tile')), before=null;
+  for(var i=0;i<sibs.length;i++){
+    var s=sibs[i].getBoundingClientRect();
+    if(y<s.top+s.height/2-6){ before=sibs[i]; break; }
+    if(y<s.bottom&&x<s.left+s.width/2){ before=sibs[i]; break; }
+  }
+  zone.insertBefore(el,before); grab=null; sDrop();
+}
+function nearestTile(x,y,max){
+  var best=null,bd=max*max;
+  tilesIn('bank').concat(tilesIn('answer')).forEach(function(t){
+    if(t.classList.contains('hinted'))return;
+    var r=t.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+    var d=(cx-x)*(cx-x)+(cy-y)*(cy-y); if(d<bd){bd=d;best=t;}
+  });
+  return best;
+}
+function tileAt(x,y){
+  var e=document.elementFromPoint(x,y);
+  var t=e&&e.closest?e.closest('.tile'):null;
+  return (t&&!t.classList.contains('hinted'))?t:nearestTile(x,y,80);
+}
+
+/* ---------- โหมดนิ้ว / เมาส์ ---------- */
+function onPointerDown(ev){
+  if(MODE==='ar'&&handSeen)return;
+  ev.preventDefault();
+  pickUp(ev.currentTarget,ev.clientX,ev.clientY);
+  window.addEventListener('pointermove',onPointerMove);
+  window.addEventListener('pointerup',onPointerUp);
+}
+function onPointerMove(ev){ moveGrab(ev.clientX,ev.clientY); }
+function onPointerUp(ev){
+  release(ev.clientX,ev.clientY);
+  window.removeEventListener('pointermove',onPointerMove);
+  window.removeEventListener('pointerup',onPointerUp);
+}
+['btnCheck','btnHint','btnClear','btnNext','btnSay'].forEach(function(id){
+  $(id).addEventListener('click',function(){ fire(id); });
+});
+
+/* ================================================================
+   8) MediaPipe Hands
+   ================================================================ */
+function initHands(){
+  try{
+    HANDS=new Hands({locateFile:function(f){
+      return 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/'+f;}});
+    HANDS.setOptions({maxNumHands:1,modelComplexity:0,
+      minDetectionConfidence:.6,minTrackingConfidence:.6});
+    HANDS.onResults(onHands);
+    pump();
+  }catch(e){
+    toast('โหลดโมเดลมือไม่สำเร็จ → สลับเป็นโหมดลากนิ้ว','#ff5252',3000);
+    MODE='touch';
+  }
+}
+function pump(){
+  if(HANDS&&!busy&&V.readyState>=2&&V.videoWidth>0){
+    busy=true;
+    HANDS.send({image:V}).then(function(){busy=false;}).catch(function(){busy=false;});
+  }
+  requestAnimationFrame(pump);
+}
+function map(nx,ny){
+  var vw=V.videoWidth||640, vh=V.videoHeight||480, sw=innerWidth, sh=innerHeight;
+  var s=Math.max(sw/vw,sh/vh), ox=(sw-vw*s)/2, oy=(sh-vh*s)/2;
+  return {x:ox+(1-nx)*vw*s, y:oy+ny*vh*s};
+}
+function onHands(res){
+  var L=res.multiHandLandmarks&&res.multiHandLandmarks[0];
+  handSeen=!!L;
+  $('hHand').textContent=L?(pinching?'จีบ✊':'แบ✋'):'—';
+  if(!L){ if(pinching){pinching=false; if(grab) release(cur.x,cur.y);} return; }
+
+  var th=map(L[4].x,L[4].y), ix=map(L[8].x,L[8].y);
+  cur.x+=((th.x+ix.x)/2-cur.x)*.42;
+  cur.y+=((th.y+ix.y)/2-cur.y)*.42;
+
+  var palm=Math.hypot(L[0].x-L[9].x,L[0].y-L[9].y)||.001;
+  var ratio=Math.hypot(L[4].x-L[8].x,L[4].y-L[8].y)/palm;
+
+  if(!pinching&&ratio<.45){ pinching=true; pickUp(tileAt(cur.x,cur.y),cur.x,cur.y); }
+  else if(pinching&&ratio>.68){ pinching=false; release(cur.x,cur.y); }
+  if(grab) moveGrab(cur.x,cur.y);
+}
+
+/* ================================================================
+   9) วาดเคอร์เซอร์ + จ้องค้างกดปุ่ม
+   ================================================================ */
+function loop(){
+  if(FX.width!==innerWidth||FX.height!==innerHeight){FX.width=innerWidth;FX.height=innerHeight;}
+  CTX.clearRect(0,0,FX.width,FX.height);
+
+  if(MODE==='ar'&&handSeen){
+    CTX.beginPath(); CTX.arc(cur.x,cur.y,pinching?19:30,0,7);
+    CTX.strokeStyle=pinching?'#00e676':'#fff'; CTX.lineWidth=5; CTX.stroke();
+    CTX.fillStyle=pinching?'rgba(0,230,118,.35)':'rgba(255,255,255,.18)'; CTX.fill();
+
+    tilesIn('bank').concat(tilesIn('answer')).forEach(function(t){t.classList.remove('hot');});
+    if(!grab){ var t=tileAt(cur.x,cur.y); if(t)t.classList.add('hot'); }
+
+    var e=document.elementFromPoint(cur.x,cur.y);
+    var btn=e&&e.closest?e.closest('.hotbtn'):null;
+    if(btn&&!grab){
+      if(btn!==dwellEl){ if(dwellEl)dwellEl.querySelector('i').style.width='0'; dwellEl=btn; dwellT=Date.now(); }
+      var p=Math.min(1,(Date.now()-dwellT)/1000);
+      btn.querySelector('i').style.width=(p*100)+'%';
+      if(p>=1){ btn.querySelector('i').style.width='0'; dwellEl=null; fire(btn.id); }
+    }else if(dwellEl){ dwellEl.querySelector('i').style.width='0'; dwellEl=null; }
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ================================================================
+   10) ปุ่มทำงาน
+   ================================================================ */
+function fire(id){
+  if(id==='btnCheck')check();
+  else if(id==='btnHint')hint();
+  else if(id==='btnClear')clearAns();
+  else if(id==='btnNext')nextQ();
+  else if(id==='btnSay')speak(solved?full(SENT[idx]):'Put the words in the correct order.');
+}
+function clearAns(){
+  if(solved)return;
+  tilesIn('answer').forEach(function(t){ if(!t.classList.contains('hinted')) $('bank').appendChild(t); });
+  sDrop();
+}
+function hint(){
+  if(solved)return;
+  var c=SENT[idx], now=tilesIn('answer'), pos=0;
+  while(pos<now.length&&now[pos].textContent===c[pos]) pos++;
+  if(pos>=c.length)return;
+  for(var i=now.length-1;i>=pos;i--) if(!now[i].classList.contains('hinted')) $('bank').appendChild(now[i]);
+  var need=c[pos];
+  var src=tilesIn('bank').filter(function(t){return t.textContent===need;})[0];
+  if(src)src.remove();
+  $('answer').insertBefore(makeTile(need,true),tilesIn('answer')[pos]||null);
+  hintUsed++; score=Math.max(0,score-3); $('hScore').textContent=score;
+  toast('💡 คำถัดไปคือ "'+need+'"  (-3)','#ffeaa7',1800);
+  speak(need);
+}
+function check(){
+  if(solved)return;
+  var mine=tilesIn('answer').map(function(t){return t.textContent;});
+  var real=SENT[idx];
+  if(mine.length<real.length){ toast('⚠️ ยังเรียงไม่ครบทุกคำ','#ffeaa7',1400); return; }
+  if(mine.join(' ')===real.join(' ')){
+    solved=true;
+    var got=hintUsed?7:10;
+    if(!hintUsed)streak++; else streak=0;
+    var bonus=(streak>=3)?5:0;
+    score+=got+bonus;
+    $('hScore').textContent=score; $('hStreak').textContent=streak+'🔥';
+    $('answer').className='zone ok';
+    toast('🎉 ถูกต้อง! +'+got+(bonus?'  (+'+bonus+' โบนัส)':''),'#00e676',1800);
+    sGood(); speak(full(real));
+    log.push({ok:true,hint:hintUsed>0,text:full(real)});
+    $('btnCheck').classList.add('hide'); $('btnNext').classList.remove('hide');
+  }else{
+    streak=0; $('hStreak').textContent='0🔥';
+    $('answer').className='zone bad'; sBad();
+    toast('❌ ยังไม่ถูก ลองสลับคำดูใหม่','#ff5252',1500);
+    setTimeout(function(){ if(!solved)$('answer').className='zone'; },600);
+  }
+}
+function nextQ(){ idx++; if(idx<SENT.length)loadQ(); else endGame(); }
+function toast(t,c,ms){
+  var m=$('msg'); m.textContent=t; m.style.color=c||'#fff';
+  clearTimeout(m._t); if(ms)m._t=setTimeout(function(){m.textContent='';},ms);
+}
+
+/* ================================================================
+   11) จบเกม + เก็บคะแนนในเครื่อง + ส่งออก CSV
+   ================================================================ */
+function endGame(){
+  clearInterval(timer);
+  if(STREAM) STREAM.getTracks().forEach(function(t){t.stop();});
+  var secs=~~((Date.now()-t0)/1000), correct=log.length, max=SENT.length*10;
+  var pct=Math.round(score/max*100);
+
+  ['hud','answer','bank','tools'].forEach(function(i){$(i).classList.add('hide');});
+  $('pEnd').classList.remove('hide');
+  $('rScore').textContent=score+'/'+max;
+  $('rCorrect').textContent=correct+'/'+SENT.length;
+  $('rTime').textContent=mmss(secs);
+  $('rSub').textContent=player.name+' • '+player.room+' • '+pct+'%';
+
+  if(pct>=90){$('rEmoji').textContent='🏆';$('rTitle').textContent='ยอดเยี่ยมมาก!';}
+  else if(pct>=70){$('rEmoji').textContent='🎉';$('rTitle').textContent='เก่งมาก!';}
+  else if(pct>=50){$('rEmoji').textContent='👍';$('rTitle').textContent='ดีแล้ว พัฒนาได้อีก';}
+  else{$('rEmoji').textContent='💪';$('rTitle').textContent='สู้ๆ ลองใหม่นะ';}
+
+  var h='<b>ทบทวนประโยคทั้งหมด</b><br><br>';
+  SENT.forEach(function(s,i){
+    var used=log[i]&&log[i].hint;
+    h+='<div'+(used?' class="miss"':'')+'>'+(i+1)+'. '+full(s)+(used?' 💡':'')+'</div>';
+  });
+  $('rReview').innerHTML=h;
+
+  saveLocal({name:player.name,room:player.room,score:score,max:max,
+    correct:correct,total:SENT.length,secs:secs,mode:MODE,
+    date:new Date().toLocaleString('th-TH')});
+  showBoard();
+}
+function saveLocal(rec){
+  try{
+    var all=JSON.parse(localStorage.getItem('ar_scores')||'[]');
+    all.push(rec); localStorage.setItem('ar_scores',JSON.stringify(all));
+  }catch(e){}
+}
+function showBoard(){
+  try{
+    var all=JSON.parse(localStorage.getItem('ar_scores')||'[]');
+    all.sort(function(a,b){return b.score-a.score||a.secs-b.secs;});
+    var top=all.slice(0,5);
+    if(!top.length)return;
+    var h='<b style="display:block;margin-top:14px">🏅 อันดับในเครื่องนี้</b>'
+        + '<table class="lb"><tr><th>#</th><th>ชื่อ</th><th>ห้อง</th><th>คะแนน</th></tr>';
+    top.forEach(function(r,i){ h+='<tr><td>'+(i+1)+'</td><td>'+r.name+'</td><td>'+r.room+'</td><td>'+r.score+'</td></tr>'; });
+    $('lbWrap').innerHTML=h+'</table>';
+  }catch(e){}
+}
+function exportCSV(){
+  try{
+    var all=JSON.parse(localStorage.getItem('ar_scores')||'[]');
+    if(!all.length){ alert('ยังไม่มีข้อมูลคะแนน'); return; }
+    var rows=[['วันเวลา','ชื่อ','ห้อง','คะแนน','เต็ม','ตอบถูก','ทั้งหมด','วินาที','โหมด']];
+    all.forEach(function(r){ rows.push([r.date,r.name,r.room,r.score,r.max,r.correct,r.total,r.secs,r.mode]); });
+    var csv='\uFEFF'+rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+    a.download='คะแนน_AR_Sentence_'+new Date().toISOString().slice(0,10)+'.csv';
+    a.click();
+  }catch(e){ alert('ส่งออกไม่สำเร็จ'); }
+}
+</script>
+</body>
+</html>
